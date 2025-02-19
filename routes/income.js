@@ -6,7 +6,10 @@ const router = express.Router();
 // Get all incomes
 router.get("/", async (req, res) => {
   try {
-    const incomes = await Income.find().populate("customer_id currency_id");
+    const incomes = await Income.find()
+      .populate("customer_id currency_id")
+      .sort({ payment_date: -1 });
+
     res.json(incomes);
   } catch (err) {
     res.status(500).json({ message: err.message });
