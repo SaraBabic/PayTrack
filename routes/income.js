@@ -39,4 +39,36 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Get a single income by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const income = await Income.findById(req.params.id).populate(
+      "customer_id currency_id"
+    );
+    if (!income) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+    res.json(income);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update an income by ID
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedIncome = await Income.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // Vraća ažurirani income
+    );
+    if (!updatedIncome) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+    res.json(updatedIncome);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 export default router;
