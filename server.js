@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import customerRoutes from "./routes/customer.js";
 import incomeRoutes from "./routes/income.js";
 import currencyRoutes from "./routes/currency.js";
+import userRoutes from "./routes/user.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/incomes", incomeRoutes);
 app.use("/api/currencies", currencyRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/api/profile", authMiddleware, (req, res) => {
   res.json({ message: "Wellcome!", userId: req.user.id });
