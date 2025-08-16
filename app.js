@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 // import * as AdminJSMongoose from '@adminjs/mongoose'
 
 import Article from "./models/article.js";
-import User from "./models/user.js";
+import User from "./models/User.js";
 
 // AdminJS.registerAdapter({
 //   Resource: AdminJSMongoose.Resource,

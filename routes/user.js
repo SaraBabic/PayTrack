@@ -1,55 +1,61 @@
 import express from "express";
-import User from "../models/user.js";
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-// REGISTER NEW USER
+// REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    if (existing) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const newUser = new User({ username, email, password });
-    await newUser.save();
+    const user = new User({ username, email, password });
+    await user.save();
 
-    res.status(201).json({ message: "User created successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    res
+      .status(201)
+      .json({ message: "Account created, check email to verify!" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// LOGIN USER
+// LOGIN (username + password)
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    const user = await User.findOne({ username });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
+    if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
-    }
 
-    // Ovde možeš dodati JWT ili session za autentifikaciju
-    res.status(200).json({ message: "Login successful", userId: user._id });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    // JWT token for 24h
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+
+    res.json({
+      token,
+      user: { id: user._id, username: user.username, email: user.email },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// GET ALL USERS (primer za admin)
+// GET ALL USERS
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // ne šalji password
+    const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
